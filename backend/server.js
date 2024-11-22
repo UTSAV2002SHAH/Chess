@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import cookieParser from "cookie-parser";
 import dotenv from 'dotenv'
 import connectDB from './src/db/connectDB.js'
 import loginRoute from "./src/routes/loginRoute.js"
@@ -15,7 +16,14 @@ connectDB(process.env.MONGO_URL);
 // middleware
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: process.env.CORS_ORIGIN,
+    credentials: true
+}));
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("Public"))
+app.use(cookieParser());
+
 
 //initalizing toutes
 app.use("/user", loginRoute);

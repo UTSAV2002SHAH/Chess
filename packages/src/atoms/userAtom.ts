@@ -2,9 +2,10 @@ import { atom, selector } from 'recoil';
 
 export const BACKEND_URL = 'http://localhost:4000';
 export interface User {
-  token: string;
   id: string;
   name: string;
+  token: string;
+  isGuest: boolean;
 }
 
 export const userAtom = atom<User>({

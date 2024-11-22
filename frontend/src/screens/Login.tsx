@@ -1,8 +1,17 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import { useRecoilState } from 'recoil';
+import { useNavigate } from "react-router-dom";
+import { userAtom } from '../../../packages/src/atoms/userAtom';
+
 import { url } from '../App'
 import { toast } from 'react-toastify';
-import { useNavigate } from "react-router-dom";
+
+
+// JWT in Cookies
+// If your backend issued the JWT during login and stored it as a cookie (using res.cookie()), 
+// the browser automatically sends that cookie along with the request when credentials: 'include' is used.
+
 
 
 export const Login = () => {
@@ -13,6 +22,7 @@ export const Login = () => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [_, setUser] = useRecoilState(userAtom);   // uses  consept to maintain state at app level any change in state will reflect to every component
 
     const onSubmitHandler = async (e: React.FormEvent) => {
 
@@ -26,21 +36,25 @@ export const Login = () => {
                 formData.append('name', name);
             }
             // const response = await axios.post(`${url}/login`, formData);
-            const response = await axios.post(`${url}/user${endpoint}`, formData, {
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            });
+            const response = await axios.post(`${url}/user${endpoint}`, formData);
             console.log(response);
-            if (response.data.success) {
+            const { success, message, user } = await response.data;
+            if (success) {
                 setName('');
                 setEmail('');
                 setPassword('');
-                if (isLoginMode) { setIsLoggedIn(true) };
-                isLoginMode ? navigate('/') : navigate("/login");
+                if (isLoginMode) {
+                    setIsLoggedIn(true);
+                    setUser(user); //create a User for frontend 
+                    navigate('/');
+                }
+                else {
+                    navigate('/login');
+                    alert("Now Try login");
+                }
             }
             else {
-                toast.error("something went wrong");
+                toast.error(message || "something went wrong");
             }
         } catch (error) {
             console.log(error);

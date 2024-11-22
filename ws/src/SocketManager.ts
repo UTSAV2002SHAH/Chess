@@ -4,17 +4,20 @@
 
 import { randomUUID } from 'crypto';
 import { WebSocket } from 'ws';
+import { userJwtClaims } from './auth';
 
 export class User {
     public socket: WebSocket;
-    // public id: string;
+    public id: string;
     public userId: string;
+    public name: string;
     public isGuest: boolean;
 
-    constructor(socket: WebSocket) {
+    constructor(socket: WebSocket, userJwtClaims: userJwtClaims) {
         this.socket = socket;
-        // this.id = randomUUID();
-        this.userId = randomUUID();
+        this.id = randomUUID();
+        this.userId = userJwtClaims.userId;
+        this.name = userJwtClaims.name;
         this.isGuest = true;
     }
 }
