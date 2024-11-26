@@ -45,7 +45,7 @@ export const Login = () => {
                 setPassword('');
                 if (isLoginMode) {
                     setIsLoggedIn(true);
-                    setUser(user); //create a User for frontend 
+                    setUser(user); //create a User for frontend
                     navigate('/');
                 }
                 else {

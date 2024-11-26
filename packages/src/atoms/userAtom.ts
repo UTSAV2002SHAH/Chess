@@ -14,21 +14,32 @@ export const userAtom = atom<User>({
     key: 'user/default',
     get: async () => {
       try {
-        const response = await fetch(`${BACKEND_URL}/auth/refresh`, {
+        const response = await fetch(`${BACKEND_URL}/user/refresh`, {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
           },
           credentials: 'include',
         });
+
         if (response.ok) {
           const data = await response.json();
-          return data;
+          if (data.success) {
+            console.log(data.user);
+
+            return data.user;
+          } else {
+            console.error("Backend error:", data.message);
+            return null;
+          }
+        } else {
+          console.error("HTTP error:", response.status);
+          return null;
         }
       } catch (e) {
         console.error(e);
+        return null;
       }
-      return null;
     },
   }),
 });

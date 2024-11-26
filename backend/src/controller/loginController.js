@@ -68,16 +68,21 @@ export const handleUserLogin = async (req, res) => {
     //email
     //req body 
     const { email, password } = req.body;
+    if (!email || !password) {
+        return res.status(400).json({ success: false, message: "Email and password are required" });
+    }
+
     console.log("Login api hit succesfull");
 
     try {
-        //find user
+        //find user&check
         const existingUser = await UserModel.findOne({ email }); // $or: [{username}, {email}]
-        //password check
+        if (!existingUser) {
+            return res.status(404).json({ success: false, message: "User not found" });
+        }
 
-        // if (existingUser.isPasswordCorrect(password)) {
-        // }
-        const ispasswordValid = existingUser.isPasswordCorrect(password)
+        //password check
+        const ispasswordValid = await existingUser.isPasswordCorrect(password)
         if (existingUser && ispasswordValid) {
 
             // const token = jwt.sign(
@@ -160,21 +165,30 @@ export const handleUserLogout = async (req, res) => {
 
 export const refresh = async (req, res) => {
 
+    // Check for refreshToken in cookies
     const inComingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
     if (!inComingRefreshToken) {
-        res.status(401).json({ success: false, message: "Unauthorised request" })
+        return res.status(401).json({ success: false, message: "Unauthorised request" })
     }
 
     try {
-        const decodedtoken = jwt.verify(inComingRefreshToken, process.env.JWT_SECRET)
-
-        const user = await UserModel.findById(decodedtoken?._id)
-        if (!user) {
-            res.status(401).send({ success: false, message: "Invalid token" })
+        // Decode the token to extract `_id`
+        let decodedtoken
+        try {
+            decodedtoken = jwt.verify(inComingRefreshToken, process.env.JWT_SECRET)
+        } catch (error) {
+            return res.status(401).json({ success: false, message: "Invalid or expired refresh token" });
         }
 
-        if (!inComingRefreshToken !== user?.refreshToken) {
-            res.status(401).send({ success: false, message: "Refresh token is expired login Again" })
+        // Find the user in the database based on `_id`
+        const user = await UserModel.findById(decodedtoken?._id)
+        if (!user) {
+            return res.status(401).send({ success: false, message: "Invalid token" })
+        }
+
+        //  Verify if the refresh token matches the one stored in the database
+        if (inComingRefreshToken !== user?.refreshToken) {
+            return res.status(401).send({ success: false, message: "Refresh token is expired login Again" })
         }
 
         const options = {
@@ -182,8 +196,18 @@ export const refresh = async (req, res) => {
             secure: true
         }
 
+        // Generate a new access token (and optionally a new refresh token)
         const { accessToken, newrefreshToken } = await generateAccessAndRefreshToken(user._id)
 
+        // User Data
+        const userData = {
+            "id": user._id,
+            "name": user.name,
+            "token": accessToken,
+            "isGuest": true
+        }
+
+        //Send Response with the new tokens and user data
         return res
             .status(200)
             .cookie("accessToken", accessToken, options)
@@ -191,16 +215,15 @@ export const refresh = async (req, res) => {
             .json(
                 {
                     success: true,
+                    user: userData,
                     accessToken: accessToken,
                     refreshToken: newrefreshToken,
-                    message: "AccessToken refreshed"
+                    message: ""
                 }
             )
     } catch (error) {
         console.log(error);
-
     }
-
 }
 
 const generateAccessAndRefreshToken = async (userId) => {
