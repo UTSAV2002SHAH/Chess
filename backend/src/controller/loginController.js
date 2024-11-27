@@ -1,9 +1,7 @@
 import UserModel from '../model/userModel.js'
 import validator from 'validator';
 import jwt from 'jsonwebtoken';
-import cookieParser from "cookie-parser";
 import dotenv from 'dotenv'
-import loginRouter from '../routes/loginRoute.js';
 dotenv.config();
 
 const JWT_KEY = process.env.JWT_SECRET;
@@ -54,7 +52,7 @@ export const handleUserSignup = async (req, res) => {
             email,
             password,
         }
-        const user = UserModel(userData);
+        const user = new UserModel(userData);
         await user.save();
 
         res.json({ success: true, message: "User Created" });
@@ -91,9 +89,10 @@ export const handleUserLogin = async (req, res) => {
 
             //access and refresh token
             const { accessToken, refreshToken } = await generateAccessAndRefreshToken(existingUser._id);
+            console.log(accessToken);
+            console.log(refreshToken);
 
-
-            const loggedInUser = await UserModel.findById(existingUser._id).select("-password -refreshToken")
+            const loggedInUser = await UserModel.findById(existingUser._id).select("-password -refreshToken -createdAt -updatedAt")
             const options = {
                 httpOnly: true,
                 secure: true
@@ -105,7 +104,9 @@ export const handleUserLogin = async (req, res) => {
                 .cookie("refreshToken", refreshToken, options)
                 .json(
                     {
-                        user: loggedInUser, accessToken, refreshToken,
+                        user: loggedInUser,
+                        accessToken,
+                        refreshToken,
                         success: true
                     },
                 )
@@ -140,26 +141,26 @@ export const handleUserLogout = async (req, res) => {
     // remove cookies
     // reset refresh token
 
-    UserModel.findByIdAndUpdate(req.user._id,
-        {
-            $set: {
-                refreshToken: undefined
-            }
-        },
-        {
-            new: true
+    try {
+        console.log(req.user);
+        await UserModel.findByIdAndUpdate(
+            req.user._id,
+            { $unset: { refreshToken: "" } },
+            { new: true }
+        );
+
+        const options = {
+            httpOnly: true,
+            secure: true
         }
-    )
 
-    const options = {
-        httpOnly: true,
-        secure: true
+        return res.status(200)
+            .clearCookie("accessToken", options)
+            .clearCookie("refreshToken", options)
+            .json({ success: true, message: "User Logged Out successfully" })
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
-
-    return res.status(200)
-        .clearCookie("accessToken", options)
-        .clearCookie("refreshToken", options)
-        .json({ success: true, message: "User Logged Out successfully" })
 
 }
 
@@ -197,7 +198,8 @@ export const refresh = async (req, res) => {
         }
 
         // Generate a new access token (and optionally a new refresh token)
-        const { accessToken, newrefreshToken } = await generateAccessAndRefreshToken(user._id)
+        const { accessToken, refreshToken: newrefreshToken } = await generateAccessAndRefreshToken(user._id)
+
 
         // User Data
         const userData = {
@@ -206,6 +208,7 @@ export const refresh = async (req, res) => {
             "token": accessToken,
             "isGuest": true
         }
+        console.log(userData);
 
         //Send Response with the new tokens and user data
         return res
