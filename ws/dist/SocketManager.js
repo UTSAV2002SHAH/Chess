@@ -6,10 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.socketManager = exports.User = void 0;
 const crypto_1 = require("crypto");
 class User {
-    constructor(socket) {
+    constructor(socket, userJwtClaims) {
         this.socket = socket;
-        // this.id = randomUUID();
-        this.userId = (0, crypto_1.randomUUID)();
+        this.id = (0, crypto_1.randomUUID)();
+        this.userId = userJwtClaims.userId;
+        this.name = userJwtClaims.name;
         this.isGuest = true;
     }
 }

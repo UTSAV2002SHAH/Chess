@@ -133,9 +133,13 @@ class Game {
                     gameId: this.gameId,
                     whitePlayer: {
                         id: this.player1UserId,
+                        name: 'White',
+                        isGuest: true,
                     },
                     blackPlayer: {
                         id: this.player2UserId,
+                        name: 'Black',
+                        isGuest: true,
                     },
                 },
             }));
