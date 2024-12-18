@@ -67,7 +67,7 @@ export const handleUserLogin = async (req, res) => {
     //req body 
     const { email, password } = req.body;
     if (!email || !password) {
-        return res.status(400).json({ success: false, message: "Email and password are required" });
+        return res.status(400).json({ success: false, message: "Email and password are required 1st log" });
     }
 
     console.log("Login api hit succesfull");
@@ -83,41 +83,60 @@ export const handleUserLogin = async (req, res) => {
         const ispasswordValid = await existingUser.isPasswordCorrect(password)
         if (existingUser && ispasswordValid) {
 
-            // const token = jwt.sign(
-            //     { userId: existingUser._id, name: existingUser.name, isGuest: true },
-            //     JWT_KEY);
+            const token = jwt.sign(
+                { userId: existingUser._id, name: existingUser.name, isGuest: true },
+                JWT_KEY);
 
             //access and refresh token
             const { accessToken, refreshToken } = await generateAccessAndRefreshToken(existingUser._id);
             console.log(accessToken);
             console.log(refreshToken);
 
-            const loggedInUser = await UserModel.findById(existingUser._id).select("-password -refreshToken -createdAt -updatedAt")
+
+            // Collecting User Data
+            // const loggedInUser = await UserModel.findById(existingUser._id).select("-password -refreshToken -createdAt -updatedAt")
+            const user = {
+                id: existingUser._id,
+                name: existingUser.name,
+                token: token,
+                isGuest: true,
+            };
+
+            console.log("...............");
+            console.log(user);
+            console.log("...............");
+
+
+
             const options = {
-                httpOnly: true,
-                secure: true
+                httpOnly: false,
+                secure: false,
+                sameSite: 'Lax',
+                path: '/',
+                maxAge: 1000 * 60 * 60 * 1, // 1 hr for accessToken
+                credentials: true
             }
 
             return res
                 .status(200)
                 .cookie("accessToken", accessToken, options)
-                .cookie("refreshToken", refreshToken, options)
+                .cookie("refreshToken", refreshToken, {
+                    httpOnly: false,
+                    secure: false,
+                    sameSite: 'Lax',
+                    path: '/',
+                    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 Day for accessToken
+                    credentials: true
+                })
                 .json(
                     {
-                        user: loggedInUser,
+                        user: user,
                         accessToken,
                         refreshToken,
                         success: true
                     },
                 )
 
-
-            // const user = {
-            //     id: existingUser._id,
-            //     name: existingUser.name,
-            //     token: token,
-            //     isGuest: true,
-            // };
 
             // console.log("Login successfull");
             // res.json({
@@ -142,6 +161,7 @@ export const handleUserLogout = async (req, res) => {
     // reset refresh token
 
     try {
+        console.log("inside logout API");
         console.log(req.user);
         await UserModel.findByIdAndUpdate(
             req.user._id,
@@ -151,7 +171,9 @@ export const handleUserLogout = async (req, res) => {
 
         const options = {
             httpOnly: true,
-            secure: true
+            secure: false,
+            sameSite: 'None', // Must match the cookie settings
+            path: '/'
         }
 
         return res.status(200)
@@ -169,7 +191,8 @@ export const refresh = async (req, res) => {
     // Check for refreshToken in cookies
     const inComingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
     if (!inComingRefreshToken) {
-        return res.status(401).json({ success: false, message: "Unauthorised request" })
+        console.log("no incoming refresh token");
+        return res.status(204).json({ success: false, message: "required Refreshtoken" });
     }
 
     try {
@@ -200,7 +223,6 @@ export const refresh = async (req, res) => {
         // Generate a new access token (and optionally a new refresh token)
         const { accessToken, refreshToken: newrefreshToken } = await generateAccessAndRefreshToken(user._id)
 
-
         // User Data
         const userData = {
             "id": user._id,
@@ -226,6 +248,7 @@ export const refresh = async (req, res) => {
             )
     } catch (error) {
         console.log(error);
+        res.status(500).json({ success: false, message: "something went wrong" });
     }
 }
 

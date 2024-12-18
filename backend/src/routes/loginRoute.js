@@ -9,6 +9,6 @@ loginRouter.post('/register', handleUserSignup);
 
 // Secured routes
 loginRouter.post('/logout', verifyJWT, handleUserLogout);
-loginRouter.post('/refresh', refresh); //refresh access token
+loginRouter.get('/refresh', refresh); //refresh access token
 
 export default loginRouter;

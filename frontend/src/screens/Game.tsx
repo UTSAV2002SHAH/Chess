@@ -4,7 +4,7 @@ import { ChessBoard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket"
 import { Chess, Move } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
-import { useUser } from '../../../packages/src/hooks/useUser'
+// import { useUser } from '../../../packages/src/hooks/useUser'
 
 // to do moves together, there's code
 export const INIT_GAME = "init_game";
@@ -31,7 +31,7 @@ export const Game = () => {
 
     const socket = useSocket();
     const { gameId } = useParams();
-    const user = useUser();  // i have just created and not used in rest of the file for comperison
+    //const user = useUser();  // i have just created and not used in rest of the file for comperison
 
     const navigate = useNavigate();
 
@@ -45,12 +45,12 @@ export const Game = () => {
 
     const [playerColour, setPlayerColour] = useState(false);
 
-    useEffect(() => {
-        if (!user) {
-            navigate('/login');
-            //   window.location.href = '/login';
-        }
-    }, [user]);
+    // useEffect(() => {
+    //     if (!user) {
+    //         navigate('/login');
+    //         //   window.location.href = '/login';
+    //     }
+    // }, [user]);
 
     useEffect(() => {
         if (!socket) { // Ensure socket and gameId both exist

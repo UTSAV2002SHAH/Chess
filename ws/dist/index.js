@@ -13,6 +13,10 @@ const gameManager = new GameManager_1.GameManager();
 wss.on('connection', function connection(ws, req) {
     // @ts-ignore
     const token = url_1.default.parse(req.url, true).query.token;
+    // const cookies = req.headers.cookie;
+    // console.log(cookies);
+    // const token = cookies?.split('; ').find(cookie => cookie.startsWith('accesstoken='))?.split('=')[1] ?? '';
+    console.log(token);
     const user = (0, auth_1.extractAuthUser)(token, ws); // Here I am createing a user explicitly but it should be via login
     gameManager.addUser(user);
     ws.on("close", () => gameManager.removeUser(user));

@@ -14,6 +14,22 @@ export const userAtom = atom<User>({
     key: 'user/default',
     get: async () => {
       try {
+        // check for refreshToken Even Exists
+        const hasRefreshToken = document.cookie
+          .split('; ')
+          .find((row) => row.startsWith('refreshToken='));
+
+        if (!hasRefreshToken) {
+          // No refresh token, return guest or null state
+          console.log("No refresh token found, user is not logged in.");
+          return {
+            id: '',
+            name: 'Guest',
+            token: '',
+            isGuest: true,
+          };
+        }
+
         const response = await fetch(`${BACKEND_URL}/user/refresh`, {
           method: 'GET',
           headers: {
@@ -38,8 +54,8 @@ export const userAtom = atom<User>({
         }
       } catch (e) {
         console.error(e);
-        return null;
       }
+      return null;
     },
   }),
 });

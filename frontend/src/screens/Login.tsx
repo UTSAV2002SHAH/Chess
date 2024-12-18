@@ -1,27 +1,33 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import { useRecoilState } from 'recoil';
+// import { useAuth0 } from "@auth0/auth0-react";
 import { useNavigate } from "react-router-dom";
+import { useRecoilState } from 'recoil';
 import { userAtom } from '../../../packages/src/atoms/userAtom';
 
 import { url } from '../App'
 import { toast } from 'react-toastify';
 
+interface LoginProps {
+    isLoggedIn: boolean;
+    setIsLoggedIn: (loggedIn: boolean) => void; // Setter function passed as a prop
+}
 
 // JWT in Cookies
 // If your backend issued the JWT during login and stored it as a cookie (using res.cookie()), 
 // the browser automatically sends that cookie along with the request when credentials: 'include' is used.
 
-
-
-export const Login = () => {
+export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
 
     const navigate = useNavigate();
     const [isLoginMode, setIsLoginMode] = useState(true);
-    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    //const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+
+    // const { user, loginWithRedirect, isAuthenticated, logout } = useAuth0();
+    // console.log("current User", user);
     const [_, setUser] = useRecoilState(userAtom);   // uses  consept to maintain state at app level any change in state will reflect to every component
 
     const onSubmitHandler = async (e: React.FormEvent) => {
@@ -29,14 +35,27 @@ export const Login = () => {
         e.preventDefault()
         try {
             const endpoint = isLoginMode ? '/login' : '/register';
-            const formData = new FormData();
-            formData.append('email', email);
-            formData.append('password', password);
-            if (!isLoginMode) {
-                formData.append('name', name);
-            }
+            // const formData = new FormData();
+            // formData.append('email', email);
+            // formData.append('password', password);
+            // if (!isLoginMode) {
+            //     formData.append('name', name);
+            // }
             // const response = await axios.post(`${url}/login`, formData);
-            const response = await axios.post(`${url}/user${endpoint}`, formData);
+            const data = {
+                name: "",
+                email: email,
+                password: password
+            };
+            if (!isLoginMode) {
+                data.name = name;
+            }
+            const response = await axios.post(`${url}/user${endpoint}`, data, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                withCredentials: true,
+            });
             console.log(response);
             const { success, message, user } = await response.data;
             if (success) {
@@ -45,6 +64,7 @@ export const Login = () => {
                 setPassword('');
                 if (isLoginMode) {
                     setIsLoggedIn(true);
+                    console.log('User:', user);
                     setUser(user); //create a User for frontend
                     navigate('/');
                 }
@@ -64,9 +84,26 @@ export const Login = () => {
 
     useEffect(() => {
         if (isLoggedIn) {
+            alert("You are already logged in");
             navigate('/'); // Redirecting to home screen after successful login
         }
     }, [isLoggedIn, navigate]);
+
+    // return (
+    //     <div className="App flex flex-col items-center justify-center w-screen h-screen gap-4">
+    //         <h3 className="w-30 items-center justify-center text-white">Hello {user?.name}</h3>
+    //         <div className="border border-white w-20 h-10 flex items-center justify-center bg-white">
+    //             <header className="App-header">
+    //                 {isAuthenticated ? (
+    //                     <button onClick={(e) => logout()}>Logout</button>
+    //                 ) : (
+    //                     <button onClick={(e) => loginWithRedirect()}>
+    //                         Login with Redirect
+    //                     </button>)}
+    //             </header>
+    //         </div>
+    //     </div>
+    // )
 
     return (
         <div className="flex justify-center items-center h-screen">
@@ -90,7 +127,7 @@ export const Login = () => {
                     <label htmlFor="">Password</label>
                     <input className="text-black p-2 border-2 border-white rounded-md mb-4"
                         id="password"
-                        type="text"
+                        type="password"
                         value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" required />
 
                     <button
@@ -112,5 +149,4 @@ export const Login = () => {
             </div>
         </div>
     );
-
 }
