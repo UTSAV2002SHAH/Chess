@@ -8,6 +8,10 @@ import { userAtom } from '../../../packages/src/atoms/userAtom';
 import { url } from '../App'
 import { toast } from 'react-toastify';
 
+// Icons import
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChess } from '@fortawesome/free-solid-svg-icons';
+
 interface LoginProps {
     isLoggedIn: boolean;
     setIsLoggedIn: (loggedIn: boolean) => void; // Setter function passed as a prop
@@ -25,23 +29,18 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
-    // const { user, loginWithRedirect, isAuthenticated, logout } = useAuth0();
+
     // console.log("current User", user);
-    const [_, setUser] = useRecoilState(userAtom);   // uses  consept to maintain state at app level any change in state will reflect to every component
+    const [user, setUser] = useRecoilState(userAtom);  // uses  consept to maintain state at app level any change in state will reflect to every component
 
     const onSubmitHandler = async (e: React.FormEvent) => {
 
         e.preventDefault()
+        setLoading(true);
         try {
             const endpoint = isLoginMode ? '/login' : '/register';
-            // const formData = new FormData();
-            // formData.append('email', email);
-            // formData.append('password', password);
-            // if (!isLoginMode) {
-            //     formData.append('name', name);
-            // }
-            // const response = await axios.post(`${url}/login`, formData);
             const data = {
                 name: "",
                 email: email,
@@ -64,6 +63,7 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
                 setPassword('');
                 if (isLoginMode) {
                     setIsLoggedIn(true);
+                    toast.success(message || "Login successful!");
                     console.log('User:', user);
                     setUser(user); //create a User for frontend
                     navigate('/');
@@ -80,7 +80,17 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
             console.log(error);
             toast.error("error occured");
         }
+        setLoading(false);
     }
+
+    useEffect(() => {
+        if (user?.isGuest) {
+            console.log(user);
+            setIsLoggedIn(true);
+            // alert("You are already logged in");
+            // navigate('/'); // Redirecting to home screen after successful login
+        }
+    }, [user]);
 
     useEffect(() => {
         if (isLoggedIn) {
@@ -105,9 +115,19 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
     //     </div>
     // )
 
-    return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="text-white w-96 h-auto border-2  border-white p-8">
+    return loading ? (
+        <div className='flex flex-col justify-center items-center  bg-transparent min-h-screen w-[100%]'>
+            <div className=" text-white">
+                <FontAwesomeIcon icon={faChess} bounce style={{ color: "#ffffff", fontSize: "80px" }} />
+                <p className="text-2xl text-white font-bold">Wait a Sec...</p>
+            </div>
+        </div>
+    ) : (
+        <div className="flex flex-col justify-center items-center w-[100%] h-screen bg-[#81B64C] gap-4">
+            <div className=" p-2">
+                <h1 className="text-white text-4xl font-bold">Create Your Chess Account...😎</h1>
+            </div>
+            <div className="text-white bg-[#312E2b] w-96 h-auto p-8 border-2 border-[#312E2b] rounded-lg">
                 <form onSubmit={onSubmitHandler} className="flex flex-col space-y-4 p-5">
 
                     {!isLoginMode && (
@@ -115,12 +135,12 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
                             <label htmlFor="name" className="mb-2">Name</label>
                             <input className="text-black p-2 border-2 border-white rounded-md mb-4"
                                 id="name"
-                                type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" required />
+                                type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Username" required />
                         </>
                     )}
 
                     <label htmlFor="email">Email</label>
-                    <input className="text-black p-2 border-2 border-white rounded-md mb-4"
+                    <input className="text-black  p-2 border-2 border-white rounded-md mb-4"                    //  class="bg-blue-100 p-2 rounded-md border-2 border-gray-300"
                         id="email"
                         type="text" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" required />
 
@@ -132,7 +152,7 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
 
                     <button
                         type="submit"
-                        className="text-white border-2 border-white rounded-md p-2  hover:bg-white hover:text-black transition duration-300">{isLoginMode ? "Login" : "Register"}</button>
+                        className="text-black border-2 border-white rounded-md p-2 bg-white hover:bg-[#81B64C] hover:text-white transition duration-300">{isLoginMode ? "Login" : "Register"}</button>
                 </form>
 
                 <p className="my-4 text-center">

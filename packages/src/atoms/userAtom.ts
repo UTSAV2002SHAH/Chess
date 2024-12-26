@@ -8,10 +8,10 @@ export interface User {
   isGuest: boolean;
 }
 
-export const userAtom = atom<User>({
+export const userAtom = atom<User | null>({
   key: 'user',
   default: selector({
-    key: 'user/default',
+    key: `user/default-${Date.now()}`, // Dynamic key to force re-run
     get: async () => {
       try {
         // check for refreshToken Even Exists
@@ -26,10 +26,11 @@ export const userAtom = atom<User>({
             id: '',
             name: 'Guest',
             token: '',
-            isGuest: true,
+            isGuest: false,
           };
         }
 
+        console.log('Refresh token found, attempting auto-login...');
         const response = await fetch(`${BACKEND_URL}/user/refresh`, {
           method: 'GET',
           headers: {

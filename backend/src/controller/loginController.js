@@ -113,8 +113,8 @@ export const handleUserLogin = async (req, res) => {
                 secure: false,
                 sameSite: 'Lax',
                 path: '/',
-                maxAge: 1000 * 60 * 60 * 1, // 1 hr for accessToken
-                credentials: true
+                // maxAge: 1000 * 60 * 60 * 10, // 1 hr for accessToken
+                expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days from now
             }
 
             return res
@@ -125,8 +125,8 @@ export const handleUserLogin = async (req, res) => {
                     secure: false,
                     sameSite: 'Lax',
                     path: '/',
-                    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 Day for accessToken
-                    credentials: true
+                    // maxAge: 1000 * 60 * 60 * 24 * 7, // 7 Day for accessToken
+                    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7) // 7 days from now
                 })
                 .json(
                     {
@@ -189,18 +189,19 @@ export const handleUserLogout = async (req, res) => {
 export const refresh = async (req, res) => {
 
     // Check for refreshToken in cookies
+    console.log(req.cookies);
     const inComingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
     if (!inComingRefreshToken) {
         console.log("no incoming refresh token");
         return res.status(204).json({ success: false, message: "required Refreshtoken" });
     }
-
     try {
         // Decode the token to extract `_id`
         let decodedtoken
         try {
             decodedtoken = jwt.verify(inComingRefreshToken, process.env.JWT_SECRET)
         } catch (error) {
+            console.log(error)
             return res.status(401).json({ success: false, message: "Invalid or expired refresh token" });
         }
 
