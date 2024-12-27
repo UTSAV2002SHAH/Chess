@@ -47,7 +47,7 @@ export const Landing: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => 
 
     // return <div className="flex w-full min-h-screen gap-2 rounded bg-[#403B3B] text-white ">
     //     <Sidebar />
-    //     <div className="flex-col justify-center items-center w-[90%] gap-4 rounded bg-[#403B3B] text-white">
+    //     <div className="flex-col justify-center items-center w-[............................................................................90%] gap-4 rounded bg-[#403B3B] text-white">
     //         <div className="pt-8 max-w-screen-lg">
     //             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
     //                 <div className="flex justify-center">
@@ -87,7 +87,6 @@ export const Landing: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => 
     return (
         <div className="flex w-full min-h-screen bg-[#403B3B] text-white">
             <Sidebar />
-
             {/* Content Area */}
             <div className="ml-[10%] flex flex-col w-[90%] overflow-y-auto p-8">
                 <div className="pt-8 max-w-screen-lg">
@@ -140,5 +139,4 @@ export const Landing: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => 
             </div>
         </div>
     );
-
 }

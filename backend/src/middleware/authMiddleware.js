@@ -4,13 +4,20 @@ import UserModel from '../model/userModel.js'
 export const verifyJWT = async (req, res, next) => {
 
     try {
+
+        console.log(req.header("Authorization")?.replace("Bearer ", ""));
+        console.log("--------------------------------------------------------------------------------------------------------");
+        console.log(req.cookies?.accessToken)
+        console.log("--------------------------------------------------------------------------------------------------------");
+
+
         const token = req.cookies?.accessToken || req.header("Authorization")?.replace("Bearer ", "")
 
         if (!token) {
             console.log("Token not found in request");
             return res.status(401).json({ success: false, message: "Token not found" });
         }
-        console.log(token);
+        // console.log(token);
 
 
         const decodedToken = jwt.verify(token, process.env.JWT_SECRET);

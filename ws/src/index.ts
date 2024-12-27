@@ -11,7 +11,7 @@ const gameManager = new GameManager();
 wss.on('connection', function connection(ws, req) {
     // @ts-ignore
 
-    const token: string = url.parse(req.url, true).query.token;
+    const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzQ2YzFjOGIyMWRhMjdjNjc5ZDIxNjAiLCJuYW1lIjoiVXRzYXYiLCJpc0d1ZXN0Ijp0cnVlLCJpYXQiOjE3MzUyMDgwNjh9.xibNOhipOeZ6-Zxlx5ekitTAqkaB66bBJLdIPlGZmSI' //string = url.parse(req.url, true).query.token;
     // const cookies = req.headers.cookie;
     // console.log(cookies);
     // const token = cookies?.split('; ').find(cookie => cookie.startsWith('accesstoken='))?.split('=')[1] ?? '';

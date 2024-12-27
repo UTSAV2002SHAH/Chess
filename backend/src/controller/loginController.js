@@ -70,7 +70,7 @@ export const handleUserLogin = async (req, res) => {
         return res.status(400).json({ success: false, message: "Email and password are required 1st log" });
     }
 
-    console.log("Login api hit succesfull");
+    // console.log("Login api hit succesfull");
 
     try {
         //find user&check
@@ -89,8 +89,8 @@ export const handleUserLogin = async (req, res) => {
 
             //access and refresh token
             const { accessToken, refreshToken } = await generateAccessAndRefreshToken(existingUser._id);
-            console.log(accessToken);
-            console.log(refreshToken);
+            // console.log(accessToken);
+            // console.log(refreshToken);
 
 
             // Collecting User Data
