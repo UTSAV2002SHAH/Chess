@@ -7,6 +7,10 @@ import { faEye } from '@fortawesome/free-solid-svg-icons';
 import { faNewspaper } from '@fortawesome/free-solid-svg-icons';
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 
+// Images Import
+// import logo from "../../../TQ-1.jpg"
+import logo from "../../../TQ-2.jpg"
+
 export const Sidebar = () => {
 
     // const navigate = useNavigate();
@@ -15,8 +19,12 @@ export const Sidebar = () => {
         <div className='w-[10%] fixed h-full flex-col gap-2 text-white lg:flex'>
             <div className='bg-[#232121] h-screen pt-2 rounded flex flex-col gap-4'>
 
-                <div className='flex items-center h-6 gap-2 pl-8 cursor-pointer hover:bg-[#403B3B]'>
-                    <p className='font-bold'>LOGO</p>
+                {/* <div className='flex items-center h-6 gap-2 pl-8 cursor-pointer hover:bg-[#403B3B]'>
+                    <img src={logo} alt="Org LOGO" />
+                </div> */}
+
+                <div className='flex items-center h-15 w-50 gap-2 cursor-pointer hover:bg-[#403B3B]'>
+                    <img src={logo} alt="Org LOGO" className="max-h-full max-w-full object-contain" />
                 </div>
 
 
