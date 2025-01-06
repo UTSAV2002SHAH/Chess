@@ -8,14 +8,12 @@ import { userJwtClaims } from './auth';
 
 export class User {
     public socket: WebSocket;
-    public id: string;
     public userId: string;
     public name: string;
     public isGuest: boolean;
 
     constructor(socket: WebSocket, userJwtClaims: userJwtClaims) {
         this.socket = socket;
-        this.id = randomUUID();
         this.userId = userJwtClaims.userId;
         this.name = userJwtClaims.name;
         this.isGuest = true;

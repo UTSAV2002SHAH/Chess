@@ -25,7 +25,6 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
 
     const navigate = useNavigate();
     const [isLoginMode, setIsLoginMode] = useState(true);
-    //const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -87,8 +86,6 @@ export const Login: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
         if (user?.isGuest) {
             console.log(user);
             setIsLoggedIn(true);
-            // alert("You are already logged in");
-            // navigate('/'); // Redirecting to home screen after successful login
         }
     }, [user]);
 

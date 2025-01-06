@@ -24,17 +24,13 @@ function App() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   // const [user, setUser] = useRecoilState(userAtom);
-  // /console.log(user);
 
   const user = useRecoilValue(userAtom); // Get the user from Recoil state
+  console.log(user);
 
   if (user === null) {
     // Show the loader while userAtom is being resolved
-    return (
-      <div className='h-screen flex justify-center items-center bg-slate-900'>
-        <Loader />
-      </div>
-    );
+    return (console.log("User not found"));
   }
 
   // //Experimental version
@@ -46,6 +42,8 @@ function App() {
   //    </div>
   //   </div>
   // )
+
+  //bg green colour 81B64C
 
 
   return (

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractAuthUser = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const SocketManager_1 = require("../SocketManager");
-const JWT_SECRET = process.env.JWT_SECRET || 'your_secret_key';
+const JWT_SECRET = 'utsav_shah';
 const extractAuthUser = (token, ws) => {
     const decoded = jsonwebtoken_1.default.verify(token, JWT_SECRET);
     console.log(decoded);

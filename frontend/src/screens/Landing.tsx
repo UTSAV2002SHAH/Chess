@@ -3,6 +3,7 @@ import { Button } from "../components/Button";
 import axios from "axios";
 import { url } from "../App";
 import { toast } from "react-toastify";
+import { useUser } from "../../../packages/src/hooks/useUser";
 
 // Icons import
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -25,6 +26,7 @@ interface LoginProps {
 export const Landing: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => {
 
     const navigate = useNavigate();
+    const user = useUser();
     const onClickHandler = async () => {
         try {
             const endpoint = '/logout'; // Adjust this if needed based on your backend routing
@@ -90,6 +92,11 @@ export const Landing: React.FC<LoginProps> = ({ isLoggedIn, setIsLoggedIn }) => 
             {/* Content Area */}
             <div className="ml-[10%] flex flex-col w-[90%] overflow-y-auto p-8">
                 <div className="pt-8 max-w-screen-lg">
+                    <div>
+                        {user?.isGuest && <>
+                            <h1 className="text-4xl ml-[55px] mb-5">Welcome {user.name} 😎</h1>
+                        </>}
+                    </div>
                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                         <div className="flex justify-center">
                             <img
