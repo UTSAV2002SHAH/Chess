@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Button } from "../components/Button"
 import { ChessBoard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket"
-import { Chess, Move } from 'chess.js'
+import { Chess } from 'chess.js'
 import { useNavigate, useParams } from "react-router-dom";
-// import { useUser } from '../../../packages/src/hooks/useUser'
+import { useUser } from "../../../packages/src/hooks/useUser";
 
 // to do moves together, there's code
 export const INIT_GAME = "init_game";
@@ -31,7 +31,7 @@ export const Game = () => {
 
     const socket = useSocket();
     const { gameId } = useParams();
-    //const user = useUser();  // i have just created and not used in rest of the file for comperison
+    const user = useUser();  // i have just created and not used in rest of the file for comperison
 
     const navigate = useNavigate();
 
@@ -42,15 +42,24 @@ export const Game = () => {
     const [_added, setAdded] = useState(false);  // dont know why
     const [started, setStarted] = useState(false);
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
+    const [playerColour, setPlayerColour] = useState("");
 
-    const [playerColour, setPlayerColour] = useState(false);
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+            //   window.location.href = '/login';
+        }
+    }, [user]);
 
-    // useEffect(() => {
-    //     if (!user) {
-    //         navigate('/login');
-    //         //   window.location.href = '/login';
-    //     }
-    // }, [user]);
+    useEffect(() => {
+        if (started) {
+            if (user?.id === gameMetadata?.blackPlayer?.id) {
+                setPlayerColour('Black')
+            } else {
+                setPlayerColour('white')
+            } //? 'b' : 'w'
+        }
+    }, [started]);
 
     useEffect(() => {
         if (!socket) { // Ensure socket and gameId both exist
@@ -77,7 +86,11 @@ export const Game = () => {
                         whitePlayer: message.payload.blackPlayer,
                     });
 
-                    setPlayerColour(message.payload.whitePlayer.id);
+                    if (user?.id === gameMetadata?.blackPlayer.id) {
+                        setPlayerColour("Black");
+                    } else {
+                        setPlayerColour("White");
+                    }
 
                     navigate(`/game/${message.payload.gameId}`);
                     console.log("Game Initialized");
@@ -94,7 +107,7 @@ export const Game = () => {
                     }
                     else {
                         chess.undo(); // Undo the last invalid move
-                        // setBoard(currentBoard); // set the to the last correct state
+                        //  setBoard(currentBoard); // set the to the last correct state
                         console.log("invalid Move");
                     }
                     break;
@@ -124,7 +137,14 @@ export const Game = () => {
         <div className="pt-8 max-w-screen-lg w-full">
             <div className="grid grid-cols-6 gap-4 w-full">
                 <div className="col-span-4 w-full flex justify-center">
-                    <ChessBoard chess={chess} setBoard={setBoard} socket={socket} board={board} gameId={gameId ?? ''} />
+                    <ChessBoard
+                        chess={chess}
+                        setBoard={setBoard}
+                        socket={socket}
+                        board={board}
+                        gameId={gameId ?? ''}
+                        myColor={user?.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'}
+                    />
                 </div>
                 <div className="col-span-2 bg-slate-800 w-full flex justify-center gap-2">
                     <div className="pt-8">
@@ -137,7 +157,7 @@ export const Game = () => {
                         </Button>}
 
                         {started && (
-                            <div className="w-200 h-20 bg-white font-weighgt-200 flex justify-center items-center">
+                            <div className="w-[100%] h-20 bg-white font-weight-200 flex flex-col justify-center items-center bg-[#ffffff]">
                                 <p>You Are : {playerColour}</p>
                                 <p>Turn : {chess.turn() === 'w' ? 'White\'s turn' : 'Black\'s turn'}</p>
                             </div>
