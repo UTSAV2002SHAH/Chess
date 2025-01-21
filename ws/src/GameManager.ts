@@ -75,42 +75,6 @@ export class GameManager {
 
                 }
             }
-            // if (this.pendingGame) {
-            //     const game = this.games.find((x) => x.gameId === this.pendingGame);
-            //     if (!game) {
-            //         console.log('Pending game not found');
-            //         return;
-            //     }
-
-            //     if (user.userId === game?.player1UserId) {
-            //         socketManager.broadcast(
-            //             game.gameId,
-            //             JSON.stringify({
-            //                 type: GAME_ALERT,
-            //                 payload: {
-            //                     message: 'Trying to connect with yourself ?',
-            //                 },
-            //             }),
-            //         );
-            //         return
-            //     }
-            //     socketManager.addUser(user, game.gameId)
-            //     await game?.updateSecondPlayer(user.userId);
-            //     this.pendingGame = null;
-            // } else {
-            //     const game = new Game(user.userId, null);
-            //     this.games.push(game);
-            //     this.pendingGame = game.gameId;
-            //     socketManager.addUser(user, game.gameId)
-            //     socketManager.broadcast(
-            //         game.gameId,
-            //         JSON.stringify({
-            //             type: GAME_ADDED,
-            //             gameId: game.gameId,
-            //             message: "Wait for 2nd Player to join"
-            //         }),
-            //     );
-
 
             if (message.type === MOVE) {
                 console.log("Move detected")

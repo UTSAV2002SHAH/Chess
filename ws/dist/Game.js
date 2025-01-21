@@ -76,6 +76,7 @@ class Game {
             return;
         }
         // Handle the move
+        // let moveResult;
         try {
             const promotionMove = isPromoting(this.board, move.from, move.to);
             if (promotionMove) {
@@ -108,7 +109,10 @@ class Game {
             SocketManager_1.socketManager.broadcast(this.gameId, JSON.stringify({
                 type: messages_1.GAME_OVER,
                 gameId: this.gameId,
-                payload: { result }
+                payload: {
+                    result,
+                    move,
+                }
             }));
             return;
         }

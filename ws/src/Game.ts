@@ -87,6 +87,7 @@ export class Game {
         }
 
         // Handle the move
+        // let moveResult;
         try {
             const promotionMove = isPromoting(this.board, move.from, move.to);
             if (promotionMove) {
@@ -121,7 +122,10 @@ export class Game {
                 JSON.stringify({
                     type: GAME_OVER,
                     gameId: this.gameId,
-                    payload: { result }
+                    payload: {
+                        result,
+                        move,
+                    }
                 })
             );
             return;
@@ -142,6 +146,7 @@ export class Game {
 
         console.log(`Move made by ${currentTurn === 'w' ? "White" : "Black"}`);
     }
+
 
 
     async updateSecondPlayer(player2UserId: string) {
@@ -172,7 +177,3 @@ export class Game {
     }
 
 }
-
-
-
-

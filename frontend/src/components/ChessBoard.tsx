@@ -198,7 +198,7 @@ export const ChessBoard = ({ chess, board, socket, setBoard, gameId, myColor }: 
                                     }
                                 }}
                                 key={j}
-                                className={`w-16 h-16 ${(i + j) % 2 === 0 ? 'bg-[#A7C7E7]' : 'bg-[#4A90E2]'}`}
+                                className={`w-20 h-20 ${(i + j) % 2 === 0 ? 'bg-[#A7C7E7]' : 'bg-[#4A90E2]'}`}
                             >
                                 <div className="w-full h-full justify-center flex">
                                     <div className="h-full justify-center flex flex-col">

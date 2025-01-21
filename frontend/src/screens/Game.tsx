@@ -15,6 +15,13 @@ export const NOT_YOUR_TURN = 'not_your_turn';
 export const GAME_ADDED = 'game_added';
 export const JOIN_GAME = 'join_game';
 
+// icon Import
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
+import { faFlag } from '@fortawesome/free-solid-svg-icons';
+
+
 export interface Player {
     id: string;
     name: string;
@@ -44,10 +51,11 @@ export const Game = () => {
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
     const [playerColour, setPlayerColour] = useState("");
 
+    const [result, setResult] = useState(false);
+
     useEffect(() => {
         if (!user) {
             navigate('/login');
-            //   window.location.href = '/login';
         }
     }, [user]);
 
@@ -82,8 +90,8 @@ export const Game = () => {
                     console.log(message.payload.gameId);
 
                     setGameMetadata({
+                        whitePlayer: message.payload.whitePlayer,
                         blackPlayer: message.payload.blackPlayer,
-                        whitePlayer: message.payload.blackPlayer,
                     });
 
                     if (user?.id === gameMetadata?.blackPlayer.id) {
@@ -107,7 +115,7 @@ export const Game = () => {
                     }
                     else {
                         chess.undo(); // Undo the last invalid move
-                        //  setBoard(currentBoard); // set the to the last correct state
+                        //  setBoard(currentBoard); // set the to the last correct statecd frontend
                         console.log("invalid Move");
                     }
                     break;
@@ -119,11 +127,15 @@ export const Game = () => {
                     alert(message.payload); // You can also update the UI to highlight the error
                     break;
                 case GAME_OVER:
+                    const lastmove = message.payload.move;
+                    chess.move(lastmove);
+                    setBoard(chess.board());
                     console.log("Game Over");
+                    setResult(true);
                     break;
             }
         };
-    }, [socket]);
+    }, [socket, chess]);
 
 
     // useEffect(() => {
@@ -146,8 +158,8 @@ export const Game = () => {
                         myColor={user?.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'}
                     />
                 </div>
-                <div className="col-span-2 bg-slate-800 w-full flex justify-center gap-2">
-                    <div className="pt-8">
+                <div className="col-span-2 bg-slate-800 flex flex-col w-fit h-fit min-h-[640px] min-w-[430px] justify-center items-center gap-2">
+                    <div className="pt-8 gap-4 flex">
                         {!started && <Button onClick={() => {
                             socket.send(JSON.stringify({
                                 type: INIT_GAME
@@ -156,14 +168,6 @@ export const Game = () => {
                             Play
                         </Button>}
 
-                        {started && (
-                            <div className="w-[100%] h-20 bg-white font-weight-200 flex flex-col justify-center items-center bg-[#ffffff]">
-                                <p>You Are : {playerColour}</p>
-                                <p>Turn : {chess.turn() === 'w' ? 'White\'s turn' : 'Black\'s turn'}</p>
-                            </div>
-                        )}
-                    </div>
-                    <div className="pt-8">
                         {!started && <Button onClick={() => {
                             socket.send(JSON.stringify({
                                 type: JOIN_GAME
@@ -172,6 +176,44 @@ export const Game = () => {
                             Join Game
                         </Button>}
                     </div>
+
+                    <div className="pt-8">
+                        {started && (
+                            <div className="w-[100%] h-20 bg-white font-weight-200 flex flex-col justify-center items-center bg-[#ffffff]">
+                                <p>You Are : {playerColour}</p>
+                                <p>Turn : {chess.turn() === 'w' ? 'White\'s turn' : 'Black\'s turn'}</p>
+                            </div>
+                        )}
+
+                        {result && (
+                            <div className="w-[100%] h-20 bg-white font-weight-200 flex flex-col justify-center items-center bg-[#ffffff]">
+                                <p>{chess.turn() === 'w' ? 'Black Wins By check mate' : 'White Wins By check mate'}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {started && (
+                        <>
+                            <div className="h-[400px] w-[400px] bg-gray-200 rounded-[10px]">
+                                <p>Moves</p>
+                            </div>
+
+                            <div className="flex gap-4">
+                                <Button onClick={() => navigate('/')}>
+                                    <FontAwesomeIcon icon={faAngleLeft} />
+                                </Button>
+
+                                <Button onClick={() => navigate('/')}>
+                                    <FontAwesomeIcon icon={faAngleRight} />
+                                </Button>
+
+                                <Button onClick={() => navigate('/')}>
+                                    <p className="text-white">Resign</p>
+                                    <FontAwesomeIcon icon={faFlag} />
+                                </Button>
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>
