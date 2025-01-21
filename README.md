@@ -3,10 +3,10 @@
 -> Game route
 -> backend Express Server
 -> Basic Login Setup
+-> Authentication via JWT
 
 
 # What is left
--> Authentication via JWT
 -> move side bar
 -> Rating system
 -> Timer
