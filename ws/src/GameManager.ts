@@ -35,14 +35,14 @@ export class GameManager {
             const message = JSON.parse(data.toString());
             console.log("Parsed message:", message);
 
-            if (!message.gameId) { // if there is no gameId in the message then create new game
-
+            if (message.type === INIT_GAME) { // if there is no gameId in the message then create new game
                 if (this.pendingGame) {
                     const game = this.games.find((x) => x.gameId === this.pendingGame);
                     if (!game) {
                         console.log('Pending game not found');
                         return;
                     }
+                    // console.log(game);
                     if (user.userId === game?.player1UserId) {
                         socketManager.broadcast(
                             game.gameId,
@@ -61,8 +61,10 @@ export class GameManager {
                 }
                 else {
                     const game = new Game(user.userId, null);
+                    // console.log(game);
                     this.games.push(game);
                     this.pendingGame = game.gameId;
+                    console.log("Game Created with Following ID:", game.gameId);
                     socketManager.addUser(user, game.gameId)
                     socketManager.broadcast(
                         game.gameId,
@@ -72,7 +74,6 @@ export class GameManager {
                             message: "Wait for 2nd Player to join"
                         }),
                     )
-
                 }
             }
 
@@ -86,6 +87,11 @@ export class GameManager {
                     game.makeMove(user, message.payload.move);
                 }
             }
+
+            // if (message.type === "RESIGN") {
+
+            // }
+
         })
     }
 }

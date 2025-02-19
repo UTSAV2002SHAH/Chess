@@ -33,13 +33,14 @@ class GameManager {
         user.socket.on("message", (data) => __awaiter(this, void 0, void 0, function* () {
             const message = JSON.parse(data.toString());
             console.log("Parsed message:", message);
-            if (!message.gameId) { // if there is no gameId in the message then create new game
+            if (message.type === messages_1.INIT_GAME) { // if there is no gameId in the message then create new game
                 if (this.pendingGame) {
                     const game = this.games.find((x) => x.gameId === this.pendingGame);
                     if (!game) {
                         console.log('Pending game not found');
                         return;
                     }
+                    // console.log(game);
                     if (user.userId === (game === null || game === void 0 ? void 0 : game.player1UserId)) {
                         SocketManager_1.socketManager.broadcast(game.gameId, JSON.stringify({
                             type: messages_1.GAME_ALERT,
@@ -55,8 +56,10 @@ class GameManager {
                 }
                 else {
                     const game = new Game_1.Game(user.userId, null);
+                    // console.log(game);
                     this.games.push(game);
                     this.pendingGame = game.gameId;
+                    console.log("Game Created with Following ID:", game.gameId);
                     SocketManager_1.socketManager.addUser(user, game.gameId);
                     SocketManager_1.socketManager.broadcast(game.gameId, JSON.stringify({
                         type: messages_1.GAME_ADDED,
@@ -75,6 +78,8 @@ class GameManager {
                     game.makeMove(user, message.payload.move);
                 }
             }
+            // if (message.type === "RESIGN") {
+            // }
         }));
     }
 }

@@ -20,6 +20,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
 import { faAngleLeft } from '@fortawesome/free-solid-svg-icons';
 import { faFlag } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 
 export interface Player {
@@ -46,12 +47,14 @@ export const Game = () => {
     const [gameID, setGameID] = useState("");
     const [chess, _setChess] = useState(new Chess());
     const [board, setBoard] = useState(chess.board());
-    const [_added, setAdded] = useState(false);  // dont know why
+    const [added, setAdded] = useState(false);  // dont know why
     const [started, setStarted] = useState(false);
     const [gameMetadata, setGameMetadata] = useState<Metadata | null>(null);
     const [playerColour, setPlayerColour] = useState("");
-
     const [result, setResult] = useState(false);
+
+
+    const [moveHistory, setMoveHistory] = useState<string[]>([]);
 
     useEffect(() => {
         if (!user) {
@@ -81,6 +84,7 @@ export const Game = () => {
 
                 case GAME_ADDED:
                     setAdded(true);
+                    console.log("added set to true");
                     setGameID((_p) => message.gameId); // new thing i learn in this line of code whenever you use a veriable which will not be used in code start with underScoroll _
                     console.log(gameID);
                     break;
@@ -105,12 +109,12 @@ export const Game = () => {
                     break;
                 case MOVE:
                     const move = message.payload;
-                    // const currentBoard = chess.board();
                     console.log(message.valid);
                     if (message.valid) {
                         chess.move(move);
                         setBoard(chess.board());
-                        //currentBoard = chess.board();
+                        //setMoveHistory(prevMoves => [...prevMoves, `${move.from} to ${move.to}`]); // Add the move to history
+                        updateMoveHistory();
                         console.log("Move made");
                     }
                     else {
@@ -137,6 +141,18 @@ export const Game = () => {
         };
     }, [socket, chess]);
 
+    //move function
+    const updateMoveHistory = () => {
+        const history = chess.history();
+        const formattedHistory = [];
+        for (let i = 0; i < history.length; i += 2) {
+            const whiteMove = history[i];
+            const blackMove = history[i + 1] || ''; // If black move is missing
+            formattedHistory.push(`${Math.floor(i / 2) + 1}. ${whiteMove} ${blackMove}`);
+        }
+        setMoveHistory(formattedHistory);
+    };
+
 
     // useEffect(() => {
     //     if (!started) {
@@ -158,15 +174,21 @@ export const Game = () => {
                         myColor={user?.id === gameMetadata?.blackPlayer?.id ? 'b' : 'w'}
                     />
                 </div>
-                <div className="col-span-2 bg-slate-800 flex flex-col w-fit h-fit min-h-[640px] min-w-[430px] justify-center items-center gap-2">
-                    <div className="pt-8 gap-4 flex">
-                        {!started && <Button onClick={() => {
-                            socket.send(JSON.stringify({
-                                type: INIT_GAME
-                            }));
-                        }}>
-                            Play
-                        </Button>}
+                <div className="col-span-2 bg-slate-800 flex flex-col w-fit h-fit min-h-[640px] min-w-[430px] justify-around items-center gap-2">
+                    <div className="gap-4 flex">
+                        {!started && (
+                            <Button
+                                onClick={() => {
+                                    socket.send(
+                                        JSON.stringify({
+                                            type: INIT_GAME
+                                        })
+                                    );
+                                    console.log("INIT_GAME Message sent");
+                                }}
+                            >
+                                {added ? <FontAwesomeIcon icon={faSpinner} spin /> : "Play"}
+                            </Button>)}
 
                         {!started && <Button onClick={() => {
                             socket.send(JSON.stringify({
@@ -177,7 +199,7 @@ export const Game = () => {
                         </Button>}
                     </div>
 
-                    <div className="pt-8">
+                    <div className="">
                         {started && (
                             <div className="w-[100%] h-20 bg-white font-weight-200 flex flex-col justify-center items-center bg-[#ffffff]">
                                 <p>You Are : {playerColour}</p>
@@ -191,11 +213,18 @@ export const Game = () => {
                             </div>
                         )}
                     </div>
-
+                    .
                     {started && (
                         <>
-                            <div className="h-[400px] w-[400px] bg-gray-200 rounded-[10px]">
+                            <div className="h-[400px]  w-[400px] bg-gray-200 rounded-[10px] overflow--hidden">
                                 <p>Moves</p>
+                                <div className="overflow-y-scroll max-h-[320px] space-y-2">
+                                    {moveHistory.map((move, index) => (
+                                        <div key={index} className="move-entry">
+                                            <p>{move}</p>
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
 
                             <div className="flex gap-4">

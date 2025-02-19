@@ -14,3 +14,5 @@ export const GAME_ADDED = 'game_added';
 export const GAME_TIME = 'game_time';
 export const EXIT_GAME = 'exit_game';
 export const OPPONENT_DISCONNECTED = 'opponent_disconnected';
+
+export const RESIGN = 'Resign';

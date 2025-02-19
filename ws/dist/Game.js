@@ -8,6 +8,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Game = void 0;
 exports.isPromoting = isPromoting;
@@ -15,6 +18,8 @@ const chess_js_1 = require("chess.js");
 const messages_1 = require("./messages");
 const crypto_1 = require("crypto");
 const SocketManager_1 = require("./SocketManager");
+const GameModel_1 = __importDefault(require("./db/models/GameModel"));
+const MoveModel_1 = __importDefault(require("./db/models/MoveModel"));
 function isPromoting(chess, from, to) {
     if (!from) {
         return false;
@@ -40,9 +45,10 @@ class Game {
         this.player1UserId = player1;
         this.player2UserId = player2;
         this.board = new chess_js_1.Chess();
-        this.gameId = gameId !== null && gameId !== void 0 ? gameId : (0, crypto_1.randomUUID)();
-        //console.log(this.gameId);
+        this.gameId = gameId !== null && gameId !== void 0 ? gameId : (0, crypto_1.randomUUID)(); // This is not the ID that matches with DB but this ID matches with WebScoket RoomID
         this.moves = [];
+        this.DBgameId = this.gameId; //Additionally created for DB operations
+        this.DBmovesId = null; // Additionally created for DB operations
         this.startTime = new Date();
     }
     makeMove(user, move) {
@@ -131,6 +137,14 @@ class Game {
             this.player2UserId = player2UserId;
             const WhitePlayer = this.player1UserId;
             const BlackPlayer = this.player2UserId;
+            // here i want the code for creating Game and move document in database
+            try {
+                yield this.createGameInDB();
+                yield this.createMoveInDB();
+            }
+            catch (error) {
+                console.log("Error While creating Game & Moves in DB:", error);
+            }
             SocketManager_1.socketManager.broadcast(this.gameId, JSON.stringify({
                 type: messages_1.INIT_GAME,
                 payload: {
@@ -147,6 +161,48 @@ class Game {
                     },
                 },
             }));
+        });
+    }
+    createGameInDB() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const newGame = new GameModel_1.default({
+                    players: {
+                        white: this.player1UserId,
+                        black: this.player2UserId,
+                    },
+                    status: "IN_PROGRESS",
+                    result: "ongoing",
+                    createdAt: this.startTime, // here we don't need to Initialize empty move array later  we will store _id from move collection
+                });
+                yield newGame.save();
+                console.log(newGame._id.toString());
+                this.DBgameId = newGame._id.toString();
+                console.log("✅ Game document created in MongoDB");
+            }
+            catch (error) {
+                console.error("❌ Error creating game document:", error);
+            }
+        });
+    }
+    createMoveInDB() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const newMove = new MoveModel_1.default({
+                    gameId: this.DBgameId,
+                    moves: [],
+                    createdAt: new Date(),
+                });
+                yield newMove.save();
+                this.DBmovesId = newMove._id.toString();
+                // Before we did not have ObjectID of moves document. So we are passing it now.
+                yield GameModel_1.default.findByIdAndUpdate(this.DBgameId, { $push: { moves: this.DBmovesId } });
+                console.log("The moves document ID is:", newMove._id.toString());
+                console.log("✅ Move document created in MongoDB");
+            }
+            catch (error) {
+                console.error("❌ Error creating move document:", error);
+            }
         });
     }
 }
