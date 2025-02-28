@@ -30,7 +30,7 @@ export class GameManager {
         // Stop Game because the user left
     }
 
-    private addHandler(user: User) {
+    private async addHandler(user: User) {
         user.socket.on("message", async (data) => {
             const message = JSON.parse(data.toString());
             console.log("Parsed message:", message);
