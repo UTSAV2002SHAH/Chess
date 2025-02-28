@@ -30,57 +30,59 @@ class GameManager {
         // Stop Game because the user left
     }
     addHandler(user) {
-        user.socket.on("message", (data) => __awaiter(this, void 0, void 0, function* () {
-            const message = JSON.parse(data.toString());
-            console.log("Parsed message:", message);
-            if (message.type === messages_1.INIT_GAME) { // if there is no gameId in the message then create new game
-                if (this.pendingGame) {
-                    const game = this.games.find((x) => x.gameId === this.pendingGame);
-                    if (!game) {
-                        console.log('Pending game not found');
-                        return;
+        return __awaiter(this, void 0, void 0, function* () {
+            user.socket.on("message", (data) => __awaiter(this, void 0, void 0, function* () {
+                const message = JSON.parse(data.toString());
+                console.log("Parsed message:", message);
+                if (message.type === messages_1.INIT_GAME) { // if there is no gameId in the message then create new game
+                    if (this.pendingGame) {
+                        const game = this.games.find((x) => x.gameId === this.pendingGame);
+                        if (!game) {
+                            console.log('Pending game not found');
+                            return;
+                        }
+                        // console.log(game);
+                        if (user.userId === (game === null || game === void 0 ? void 0 : game.player1UserId)) {
+                            SocketManager_1.socketManager.broadcast(game.gameId, JSON.stringify({
+                                type: messages_1.GAME_ALERT,
+                                payload: {
+                                    message: 'Trying to connect with yourself ?',
+                                },
+                            }));
+                            return;
+                        }
+                        SocketManager_1.socketManager.addUser(user, game.gameId);
+                        yield (game === null || game === void 0 ? void 0 : game.updateSecondPlayer(user.userId));
+                        this.pendingGame = null;
                     }
-                    // console.log(game);
-                    if (user.userId === (game === null || game === void 0 ? void 0 : game.player1UserId)) {
+                    else {
+                        const game = new Game_1.Game(user.userId, null);
+                        // console.log(game);
+                        this.games.push(game);
+                        this.pendingGame = game.gameId;
+                        console.log("Game Created with Following ID:", game.gameId);
+                        SocketManager_1.socketManager.addUser(user, game.gameId);
                         SocketManager_1.socketManager.broadcast(game.gameId, JSON.stringify({
-                            type: messages_1.GAME_ALERT,
-                            payload: {
-                                message: 'Trying to connect with yourself ?',
-                            },
+                            type: messages_1.GAME_ADDED,
+                            gameId: game.gameId,
+                            message: "Wait for 2nd Player to join"
                         }));
-                        return;
                     }
-                    SocketManager_1.socketManager.addUser(user, game.gameId);
-                    yield (game === null || game === void 0 ? void 0 : game.updateSecondPlayer(user.userId));
-                    this.pendingGame = null;
                 }
-                else {
-                    const game = new Game_1.Game(user.userId, null);
-                    // console.log(game);
-                    this.games.push(game);
-                    this.pendingGame = game.gameId;
-                    console.log("Game Created with Following ID:", game.gameId);
-                    SocketManager_1.socketManager.addUser(user, game.gameId);
-                    SocketManager_1.socketManager.broadcast(game.gameId, JSON.stringify({
-                        type: messages_1.GAME_ADDED,
-                        gameId: game.gameId,
-                        message: "Wait for 2nd Player to join"
-                    }));
+                if (message.type === messages_1.MOVE) {
+                    console.log("Move detected");
+                    const gameId = message.gameId;
+                    console.log("move made in following game:", gameId);
+                    const game = this.games.find((game) => game.gameId === gameId);
+                    //const game = this.games.find(game => game.player1 === socket || game.player2 === socket) // old logic before GameID
+                    if (game) {
+                        game.makeMove(user, message.payload.move);
+                    }
                 }
-            }
-            if (message.type === messages_1.MOVE) {
-                console.log("Move detected");
-                const gameId = message.gameId;
-                console.log("move made in following game:", gameId);
-                const game = this.games.find((game) => game.gameId === gameId);
-                //const game = this.games.find(game => game.player1 === socket || game.player2 === socket) // old logic before GameID
-                if (game) {
-                    game.makeMove(user, message.payload.move);
-                }
-            }
-            // if (message.type === "RESIGN") {
-            // }
-        }));
+                // if (message.type === "RESIGN") {
+                // }
+            }));
+        });
     }
 }
 exports.GameManager = GameManager;

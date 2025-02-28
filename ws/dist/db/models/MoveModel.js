@@ -26,14 +26,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
 // Define the Schema
 const moveSchema = new mongoose_1.Schema({
-    gameId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Game", required: true, unique: true },
+    gameId: { type: mongoose_1.Schema.Types.ObjectId, ref: "Game", unique: true },
     moves: [
         {
             moveNumber: { type: Number, required: true },
             from: { type: String, required: true },
             to: { type: String, required: true },
-            before: { type: String, required: true },
-            after: { type: String, required: true },
+            before: { type: String, required: true }, // Note before represent the piece that was moved
+            after: { type: String, required: true }, // and after represent the piece that gets captured
             san: { type: String },
             createdAt: { type: Date, default: Date.now },
         },

@@ -24,14 +24,14 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const gameSchema = new mongoose_1.Schema({
+const gameSchema = new mongoose_1.default.Schema({
     players: {
-        white: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
-        black: { type: mongoose_1.Schema.Types.ObjectId, ref: "User", required: true },
+        white: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User", },
+        black: { type: mongoose_1.default.Schema.Types.ObjectId, ref: "User", },
     },
     moves: [{ type: mongoose_1.Schema.Types.ObjectId, ref: "Move" }], // Move structure
     status: { type: String, enum: ["IN_PROGRESS", "COMPLETED", "DRAW"], default: "IN_PROGRESS" },
-    result: { type: String, default: "ongoing" },
+    result: { type: String, enum: ["WHITE_WINS", "BLACK_WINS", "DRAW", "ongoing"], default: "ongoing" },
     createdAt: { type: Date, default: Date.now },
 });
 // Create the model without an explicit TypeScript interface
